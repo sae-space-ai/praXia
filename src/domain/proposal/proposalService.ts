@@ -54,8 +54,7 @@ export function proposeWorkPlanFromMission(missionId: string): ProposedWorkPlan 
   
   for (const rel of objectiveRelations) {
     // Get objective details
-    const objectiveService = require('../objective/objectiveService');
-    const objective = objectiveService.getObjectiveService(rel.objectiveId);
+    const objective = getObjectiveService(rel.objectiveId);
     
     if (!objective) continue;
     
@@ -145,7 +144,7 @@ function inferTaskTypeFromObjective(objective: any): CreateTaskInput['taskType']
     return 'RESEARCH';
   }
   if (combined.includes('diseñar') || combined.includes('design')) {
-    return 'DESIGN';
+    return 'DECISION_PREPARATION';
   }
   if (combined.includes('implementar') || combined.includes('implement')) {
     return 'IMPLEMENTATION_PREPARATION';
