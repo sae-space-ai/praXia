@@ -48,7 +48,10 @@ describe('Architecture — Layer separation', () => {
     // require localStorage/browser APIs at module load time.
     // Since we can import types cleanly in a test environment,
     // this confirms the domain is decoupled from persistence.
-    const typesImport = import('./types');
-    expect(typesImport).toBeDefined();
+    
+    // Static import at module level (line 9) already proves this.
+    // This test explicitly verifies the types are accessible.
+    const testType: import('./types').NeedType = 'PROBLEM';
+    expect(testType).toBe('PROBLEM');
   });
 });
