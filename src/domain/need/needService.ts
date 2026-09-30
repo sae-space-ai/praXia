@@ -8,6 +8,7 @@
 import type { Need, CreateNeedInput, NeedType, NeedStatus, NeedPriority } from './types';
 import { isValidFamilyId } from './families';
 import * as store from '../../persistence/needStore';
+import * as relationStore from '../../persistence/relationStore';
 
 // ============================================================
 // VALIDATION
@@ -84,6 +85,8 @@ export function getNeedService(id: string): Need | null {
 }
 
 export function deleteNeedService(id: string): boolean {
+  // Clean up NeedObjectiveRelations before deleting the need
+  relationStore.deleteRelationsByNeedId(id);
   return store.deleteNeed(id);
 }
 
@@ -102,4 +105,12 @@ export function updateNeedStatusService(id: string, status: NeedStatus): Need | 
  */
 export function resolveOrganizationId(): string {
   return store.getOrganizationId();
+}
+
+/**
+ * Get a NEED by ID (raw access, no business logic).
+ * Used by other domain modules (e.g., objectiveService) for validation.
+ */
+export function getNeedByIdRaw(id: string): Need | null {
+  return store.getNeedById(id);
 }

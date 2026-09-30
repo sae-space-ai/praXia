@@ -98,6 +98,9 @@ export function updateNeed(id: string, updates: Partial<Need>): Need | null {
 
 /**
  * Delete a need by ID.
+ * NOTE: This does NOT clean up NeedObjectiveRelations.
+ *       The service layer (needService or objectiveService)
+ *       is responsible for calling relation cleanup.
  */
 export function deleteNeed(id: string): boolean {
   const needs = getAllNeeds();

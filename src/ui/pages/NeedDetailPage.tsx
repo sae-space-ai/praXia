@@ -9,24 +9,36 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Need, NeedStatus } from '../../domain/need/types';
+import type { NeedObjectiveRelation } from '../../domain/objective/relations';
 import { getNeedService, deleteNeedService, updateNeedStatusService } from '../../domain/need/needService';
 import { getFamilyById } from '../../domain/need/families';
 import { getNeedTypeLabel } from '../../domain/need/needTypes';
 import { getVerificationLabel, getVerificationColor } from '../../domain/need/verification';
+import { getRelationsByNeedService } from '../../domain/objective/objectiveService';
+import { getObjectiveService } from '../../domain/objective/objectiveService';
 import { STATUS_LABELS, getStatusLabel, getPriorityLabel } from '../constants';
 
 export default function NeedDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [need, setNeed] = useState<Need | null>(null);
+  const [relatedObjectives, setRelatedObjectives] = useState<NeedObjectiveRelation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
     const found = getNeedService(id);
     setNeed(found);
+    if (found) {
+      setRelatedObjectives(getRelationsByNeedService(id));
+    }
     setLoading(false);
   }, [id]);
+
+  const getObjectiveTitle = (objectiveId: string): string => {
+    const obj = getObjectiveService(objectiveId);
+    return obj ? obj.title : `${objectiveId.substring(0, 8)}…`;
+  };
 
   if (loading) {
     return (
@@ -156,6 +168,21 @@ export default function NeedDetailPage() {
         </div>
       </div>
 
+      {/* Actions: Create Objective from this NEED */}
+      <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
+        <h3 className="text-sm font-semibold text-slate-900 mb-3">Transformar en Objetivo</h3>
+        <p className="text-xs text-slate-500 mb-3">
+          Genere una propuesta de objetivo desde esta necesidad. La propuesta no se guardará
+          automáticamente: deberá revisarla y confirmarla manualmente.
+        </p>
+        <Link
+          to={`/objectives/new?fromNeed=${need.id}`}
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          Crear objetivo desde esta NEED →
+        </Link>
+      </div>
+
       {/* Status Management */}
       <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
         <h3 className="text-sm font-semibold text-slate-900 mb-3">Gestión de Estado</h3>
@@ -271,13 +298,21 @@ export default function NeedDetailPage() {
             )}
           </div>
 
-          {/* Objectives (prepared for future) */}
+          {/* Objectives — using NeedObjectiveRelation as SOURCE OF TRUTH */}
           <div>
-            <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Objetivos asociados</p>
-            {need.objectiveIds.length > 0 ? (
-              <p className="text-sm text-slate-700">{need.objectiveIds.length} objetivo(s) vinculado(s)</p>
+            <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Objetivos asociados (SOURCE OF TRUTH)</p>
+            {relatedObjectives.length > 0 ? (
+              <ul className="space-y-1">
+                {relatedObjectives.map((rel) => (
+                  <li key={rel.id} className="text-sm text-slate-700">
+                    <Link to={`/objectives/${rel.objectiveId}`} className="text-indigo-600 hover:text-indigo-700">
+                      → {getObjectiveTitle(rel.objectiveId)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <p className="text-sm text-slate-400 italic">No definido — NOT_IMPLEMENTED</p>
+              <p className="text-sm text-slate-400 italic">No hay objetivos asociados todavía</p>
             )}
           </div>
         </div>

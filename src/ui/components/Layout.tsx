@@ -44,6 +44,16 @@ export default function Layout({ children }: LayoutProps) {
                 Necesidades
               </Link>
               <Link
+                to="/objectives"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  location.pathname.startsWith('/objectives')
+                    ? 'bg-indigo-50 text-indigo-700'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                Objetivos
+              </Link>
+              <Link
                 to="/needs/new"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === '/needs/new'
