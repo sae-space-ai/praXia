@@ -38,5 +38,6 @@ export {
   deleteNeedService,
   updateNeedStatusService,
   validateNeedInput,
+  resolveOrganizationId,
 } from './needService';
 export type { ValidationResult } from './needService';

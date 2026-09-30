@@ -94,3 +94,12 @@ export function updateNeedStatusService(id: string, status: NeedStatus): Need | 
   }
   return store.updateNeed(id, { status });
 }
+
+/**
+ * Resolve the current organization ID.
+ * This is the single entry point for UI to obtain the organization context.
+ * UI must NOT import from persistence directly.
+ */
+export function resolveOrganizationId(): string {
+  return store.getOrganizationId();
+}

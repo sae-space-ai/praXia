@@ -141,6 +141,7 @@ function saveNeeds(needs: Need[]): void {
 
 /**
  * Get or create the default organization.
+ * @internal Used by needService, not directly by UI
  */
 export function getOrganizationId(): string {
   let orgId = localStorage.getItem(ORG_KEY);

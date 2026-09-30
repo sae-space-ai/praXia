@@ -8,8 +8,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { CreateNeedInput } from '../../domain/need/types';
-import { createNeedService } from '../../domain/need/needService';
-import { getOrganizationId } from '../../persistence/needStore';
+import { createNeedService, resolveOrganizationId } from '../../domain/need/needService';
 import NeedForm from '../components/NeedForm';
 
 export default function CreateNeedPage() {
@@ -37,8 +36,8 @@ export default function CreateNeedPage() {
     setIsSubmitting(true);
     setErrors([]);
 
-    // Resolve organization ID
-    const orgId = getOrganizationId();
+    // Resolve organization ID through service layer
+    const orgId = resolveOrganizationId();
     const fullInput: CreateNeedInput = {
       ...input,
       organizationId: orgId,
