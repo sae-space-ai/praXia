@@ -29,6 +29,7 @@ import {
   getAllObjectivesService,
   getObjectiveService,
   deleteObjectiveService,
+  updateObjectiveService,
   createRelationService,
   getRelationsByNeedService,
   getRelationsByObjectiveService,
@@ -186,6 +187,30 @@ describe('T14 — Hierarchy rules for SPECIFIC/THEMATIC', () => {
     );
     expect(result.success).toBe(false);
   });
+
+  it('THEMATIC without parent is allowed (incomplete hierarchy)', () => {
+    const result = createObjectiveService(
+      validObjectiveInput({
+        objectiveClass: 'THEMATIC',
+        parentObjectiveId: null,
+        title: 'Thematic without parent',
+      })
+    );
+    expect(result.success).toBe(true);
+    expect(result.objective!.parentObjectiveId).toBeNull();
+  });
+
+  it('SPECIFIC without parent is allowed (incomplete hierarchy)', () => {
+    const result = createObjectiveService(
+      validObjectiveInput({
+        objectiveClass: 'SPECIFIC',
+        parentObjectiveId: null,
+        title: 'Specific without parent',
+      })
+    );
+    expect(result.success).toBe(true);
+    expect(result.objective!.parentObjectiveId).toBeNull();
+  });
 });
 
 // ============================================================
@@ -203,6 +228,26 @@ describe('T15 — Objective cannot be its own parent', () => {
     );
     expect(result.success).toBe(false);
     expect(result.errors!.some((e) => e.includes('no existe'))).toBe(true);
+  });
+
+  it('rejects self-reference when updating parentObjectiveId', () => {
+    // Create an objective
+    const createResult = createObjectiveService(validObjectiveInput());
+    expect(createResult.success).toBe(true);
+    const objective = createResult.objective!;
+
+    // Try to set its own ID as parent
+    const updateResult = updateObjectiveService(objective.id, {
+      parentObjectiveId: objective.id,
+    });
+
+    // Should fail
+    expect(updateResult).toBeNull();
+
+    // Verify the objective was not modified
+    const unchanged = getObjectiveService(objective.id);
+    expect(unchanged).not.toBeNull();
+    expect(unchanged!.parentObjectiveId).toBeNull();
   });
 });
 

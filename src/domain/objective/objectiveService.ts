@@ -149,6 +149,24 @@ export function updateObjectiveService(
   id: string,
   updates: Partial<Objective>
 ): Objective | null {
+  // Self-reference validation: an objective cannot be its own parent
+  if (updates.parentObjectiveId === id) {
+    console.error(`[PRAXIA] An objective cannot be its own parent: ${id}`);
+    return null;
+  }
+  
+  // Hierarchy validation (if parent is being changed)
+  if (updates.parentObjectiveId && updates.objectiveClass) {
+    const hierarchyValidation = validateHierarchy(
+      updates.objectiveClass,
+      updates.parentObjectiveId
+    );
+    if (!hierarchyValidation.valid) {
+      console.error(`[PRAXIA] Hierarchy validation failed:`, hierarchyValidation.errors);
+      return null;
+    }
+  }
+  
   return store.updateObjective(id, updates);
 }
 
