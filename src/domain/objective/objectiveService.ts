@@ -14,6 +14,7 @@ import type {
 import { OBJECTIVE_CLASSES, OPERATIONAL_STATUSES } from './catalogs';
 import * as store from '../../persistence/objectiveStore';
 import * as relationStore from '../../persistence/relationStore';
+import * as objectiveMissionRelationStore from '../../persistence/objectiveMissionRelationStore';
 import type { NeedObjectiveRelation, CreateRelationInput } from './relations';
 import { getNeedByIdRaw } from '../need/needService';
 
@@ -171,8 +172,10 @@ export function updateObjectiveService(
 }
 
 export function deleteObjectiveService(id: string): boolean {
-  // Delete all relations involving this objective
+  // Delete all NeedObjectiveRelations involving this objective
   relationStore.deleteRelationsByObjectiveId(id);
+  // Delete all ObjectiveMissionRelations involving this objective
+  objectiveMissionRelationStore.deleteObjectiveMissionRelationsByObjectiveId(id);
   // Delete the objective
   return store.deleteObjective(id);
 }

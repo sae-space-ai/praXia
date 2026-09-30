@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Objective, OperationalStatus } from '../../domain/objective/types';
 import type { NeedObjectiveRelation } from '../../domain/objective/relations';
+import type { ObjectiveMissionRelation } from '../../domain/mission/relations';
 import {
   getObjectiveService,
   deleteObjectiveService,
@@ -13,6 +14,11 @@ import {
   getRelationsByObjectiveService,
   deleteRelationService,
 } from '../../domain/objective/objectiveService';
+import {
+  getMissionsForObjectiveService,
+  getMissionService,
+} from '../../domain/mission/missionService';
+import { getMissionTypeLabel } from '../../domain/mission/catalogs';
 import { getObjectiveClassLabel, getOperationalStatusLabel, getBaselineStateLabel, getTargetStateLabel } from '../../domain/objective/catalogs';
 import { getVerificationLabel, getVerificationColor } from '../../domain/need/verification';
 import { getNeedService } from '../../domain/need/needService';
@@ -23,6 +29,7 @@ export default function ObjectiveDetailPage() {
   const navigate = useNavigate();
   const [objective, setObjective] = useState<Objective | null>(null);
   const [relations, setRelations] = useState<NeedObjectiveRelation[]>([]);
+  const [missionRelations, setMissionRelations] = useState<ObjectiveMissionRelation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +38,7 @@ export default function ObjectiveDetailPage() {
     setObjective(found);
     if (found) {
       setRelations(getRelationsByObjectiveService(id));
+      setMissionRelations(getMissionsForObjectiveService(id));
     }
     setLoading(false);
   }, [id]);
@@ -88,6 +96,11 @@ export default function ObjectiveDetailPage() {
   const getNeedTitle = (needId: string): string => {
     const need = getNeedService(needId);
     return need ? need.title : `${needId.substring(0, 8)}…`;
+  };
+
+  const getMissionTitle = (missionId: string): string => {
+    const mission = getMissionService(missionId);
+    return mission ? mission.title : `${missionId.substring(0, 8)}…`;
   };
 
   return (
@@ -213,6 +226,37 @@ export default function ObjectiveDetailPage() {
             No hay NEEDs relacionadas. Puede crear una relación desde el detalle de una NEED.
           </p>
         )}
+      </div>
+
+      {/* Related MISSIONs */}
+      <div className="bg-white border border-slate-200 rounded-xl p-6 mb-6">
+        <h3 className="text-sm font-semibold text-slate-900 mb-4">Misiones Relacionadas</h3>
+        {missionRelations.length > 0 ? (
+          <ul className="space-y-2">
+            {missionRelations.map((rel) => (
+              <li key={rel.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <Link
+                  to={`/missions/${rel.missionId}`}
+                  className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                >
+                  {getMissionTitle(rel.missionId)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-slate-400 italic">
+            No hay misiones relacionadas.
+          </p>
+        )}
+        <div className="mt-4 pt-4 border-t border-slate-100">
+          <Link
+            to={`/missions/new?fromObjective=${objective.id}`}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Crear misión desde este objetivo →
+          </Link>
+        </div>
       </div>
 
       {/* Verification Notice */}

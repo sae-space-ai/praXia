@@ -13,6 +13,9 @@ import NeedDetailPage from './ui/pages/NeedDetailPage';
 import ObjectivesListPage from './ui/pages/ObjectivesListPage';
 import CreateObjectivePage from './ui/pages/CreateObjectivePage';
 import ObjectiveDetailPage from './ui/pages/ObjectiveDetailPage';
+import MissionsListPage from './ui/pages/MissionsListPage';
+import CreateMissionPage from './ui/pages/CreateMissionPage';
+import MissionDetailPage from './ui/pages/MissionDetailPage';
 
 export default function App() {
   return (
@@ -28,6 +31,11 @@ export default function App() {
           <Route path="/objectives" element={<ObjectivesListPage />} />
           <Route path="/objectives/new" element={<CreateObjectivePage />} />
           <Route path="/objectives/:id" element={<ObjectiveDetailPage />} />
+          
+          {/* MISSIONs */}
+          <Route path="/missions" element={<MissionsListPage />} />
+          <Route path="/missions/new" element={<CreateMissionPage />} />
+          <Route path="/missions/:id" element={<MissionDetailPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>
