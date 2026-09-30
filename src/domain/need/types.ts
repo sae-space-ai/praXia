@@ -118,6 +118,13 @@ export interface Need {
   
   // Future relationships (prepared but not yet implemented)
   // These IDs will link to future OBJECTIVE entities
+  //
+  // ⚠️ ARCHITECTURAL DECISION — SOURCE OF TRUTH
+  // The future source of truth for Need↔Objective relationships
+  // will be NeedObjectiveRelation (see below), NOT this array.
+  // objectiveIds is a convenience projection that may be derived
+  // from NeedObjectiveRelation records. It must NOT become an
+  // independent source of truth that could contradict the relation table.
   objectiveIds: string[];
 }
 
