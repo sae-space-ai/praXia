@@ -8,30 +8,12 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import type { Need } from '../../domain/need/types';
+import type { Need, NeedStatus } from '../../domain/need/types';
 import { getNeedService, deleteNeedService, updateNeedStatusService } from '../../domain/need/needService';
 import { getFamilyById } from '../../domain/need/families';
 import { getNeedTypeLabel } from '../../domain/need/needTypes';
 import { getVerificationLabel, getVerificationColor } from '../../domain/need/verification';
-
-const STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Borrador',
-  REGISTERED: 'Registrada',
-  IN_DIAGNOSIS: 'En diagnóstico',
-  OBJECTIVES_DEFINED: 'Objetivos definidos',
-  IN_PROGRESS: 'En progreso',
-  EVALUATED: 'Evaluada',
-  CLOSED: 'Cerrada',
-  ARCHIVED: 'Archivada',
-};
-
-const PRIORITY_LABELS: Record<string, string> = {
-  CRITICAL: 'Crítica',
-  HIGH: 'Alta',
-  MEDIUM: 'Media',
-  LOW: 'Baja',
-  NOT_ASSESSED: 'No evaluada',
-};
+import { STATUS_LABELS, getStatusLabel, getPriorityLabel } from '../constants';
 
 export default function NeedDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -72,8 +54,8 @@ export default function NeedDetailPage() {
   const typeLabel = getNeedTypeLabel(need.type);
   const verificationLabel = getVerificationLabel(need.overallVerification);
   const verificationColor = getVerificationColor(need.overallVerification);
-  const statusLabel = STATUS_LABELS[need.status] ?? need.status;
-  const priorityLabel = PRIORITY_LABELS[need.priority] ?? 'No evaluada';
+  const statusLabel = getStatusLabel(need.status);
+  const priorityLabel = getPriorityLabel(need.priority);
 
   const handleDelete = () => {
     if (window.confirm('¿Está seguro de que desea eliminar esta necesidad? Esta acción no se puede deshacer.')) {
@@ -83,10 +65,24 @@ export default function NeedDetailPage() {
   };
 
   const handleStatusChange = (newStatus: string) => {
-    const updated = updateNeedStatusService(need.id, newStatus as Need['status']);
+    const updated = updateNeedStatusService(need.id, newStatus as NeedStatus);
     if (updated) {
       setNeed(updated);
     }
+  };
+
+  /**
+   * Get a short display label for a related need.
+   * If the related need exists in storage, show its title.
+   * Otherwise show the ID (truncated) as a fallback.
+   */
+  const getRelatedNeedLabel = (relatedId: string): string => {
+    const related = getNeedService(relatedId);
+    if (related) {
+      return related.title;
+    }
+    // Fallback: truncated ID (NOT fake data, just the identifier)
+    return `${relatedId.substring(0, 8)}…`;
   };
 
   return (
@@ -129,7 +125,7 @@ export default function NeedDetailPage() {
           <div>
             <p className="text-xs text-slate-400 uppercase tracking-wide mb-0.5">Familia</p>
             <p className="text-sm font-medium text-slate-900">
-              {family ? `${family.code}` : 'Desconocida'}
+              {family ? family.code : 'Desconocida'}
             </p>
             {family && (
               <p className="text-xs text-slate-500">{family.name}</p>
@@ -249,6 +245,14 @@ export default function NeedDetailPage() {
             </p>
           </div>
 
+          {/* Source */}
+          <div>
+            <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Fuente</p>
+            <p className="text-sm text-slate-400 italic">
+              {need.source ?? 'No registrada — UNKNOWN'}
+            </p>
+          </div>
+
           {/* Related Needs */}
           <div>
             <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Necesidades relacionadas</p>
@@ -257,7 +261,7 @@ export default function NeedDetailPage() {
                 {need.relatedNeedIds.map((rid) => (
                   <li key={rid} className="text-sm text-slate-700">
                     <Link to={`/needs/${rid}`} className="text-indigo-600 hover:text-indigo-700">
-                      → {rid}
+                      → {getRelatedNeedLabel(rid)}
                     </Link>
                   </li>
                 ))}
@@ -282,7 +286,7 @@ export default function NeedDetailPage() {
       {/* Verification Notice */}
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
         <p className="text-xs text-slate-500">
-          <strong>Estado de verificación:</strong> Esta necesidad tiene verificación "{verificationLabel}".
+          <strong>Estado de verificación:</strong> Esta necesidad tiene verificación &ldquo;{verificationLabel}&rdquo;.
           Ningún dato se considerará verificado hasta que exista evidencia suficiente.
           PRAXIA nunca convierte automáticamente una hipótesis en hecho.
         </p>

@@ -8,7 +8,7 @@
  * No data here should be confused with production data.
  */
 
-import type { Need, CreateNeedInput, NeedStatus, NeedPriority, VerificationState } from '../domain/need/types';
+import type { Need, CreateNeedInput, NeedStatus } from '../domain/need/types';
 import { v4 as uuidv4 } from 'uuid';
 
 const STORAGE_KEY = 'praxia_needs';
@@ -52,9 +52,9 @@ export function createNeed(input: CreateNeedInput): Need {
     description: input.description,
     type: input.type,
     domain: input.domain,
-    status: 'REGISTERED' as NeedStatus,
+    status: 'REGISTERED',
     priority: input.priority,
-    overallVerification: 'UNKNOWN' as VerificationState,
+    overallVerification: 'UNKNOWN',
     createdAt: now,
     updatedAt: now,
     symptoms: [],
@@ -64,7 +64,7 @@ export function createNeed(input: CreateNeedInput): Need {
     constraints: [],
     owner: null,
     source: null,
-    confidence: 'UNKNOWN' as VerificationState,
+    confidence: 'UNKNOWN',
     objectiveIds: [], // Prepared for future many-to-many with Objectives
   };
 

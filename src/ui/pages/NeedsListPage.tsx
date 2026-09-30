@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import type { Need } from '../../domain/need/types';
 import { getAllNeedsService } from '../../domain/need/needService';
 import { FAMILIES } from '../../domain/need/families';
@@ -16,10 +16,13 @@ export default function NeedsListPage() {
   const [needs, setNeeds] = useState<Need[]>([]);
   const [filterDomain, setFilterDomain] = useState<string>('ALL');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const location = useLocation();
 
+  // Refresh data whenever the user navigates back to this page
+  // (e.g., after creating or deleting a need)
   useEffect(() => {
     setNeeds(getAllNeedsService());
-  }, []);
+  }, [location.key]);
 
   const filteredNeeds = needs.filter((n) => {
     if (filterDomain !== 'ALL' && n.domain !== filterDomain) return false;
